@@ -49,11 +49,38 @@ async function fetchGraphAccessToken() {
     process.env.AZURE_CLIENT_SECRET,
   );
 
-  const tokenResponse = await credential.getToken("https://graph.microsoft.com/.default");
-  if (!tokenResponse?.token) {
-    throw new Error("Failed to acquire Microsoft Graph access token.");
+  try {
+    const tokenResponse = await credential.getToken("https://graph.microsoft.com/.default");
+    if (!tokenResponse?.token) {
+      throw new Error("Token response had no token.");
+    }
+    return tokenResponse.token;
+  } catch (err) {
+    const msg = err?.message ?? String(err);
+    throw new Error(
+      `Failed to acquire Microsoft Graph access token (check AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET): ${msg}`,
+    );
   }
-  return tokenResponse.token;
+}
+
+function summarizeGraphFailure(response, responseBody) {
+  const parts = [];
+  parts.push(responseBody?.trim() ? responseBody.trim() : "body=(empty)");
+
+  const wwwAuth = response.headers.get("www-authenticate");
+  if (wwwAuth) {
+    parts.push(`WWW-Authenticate: ${wwwAuth}`);
+  }
+
+  const reqId =
+    response.headers.get("request-id") ??
+    response.headers.get("x-ms-request-id") ??
+    response.headers.get("client-request-id");
+  if (reqId) {
+    parts.push(`request-id: ${reqId}`);
+  }
+
+  return parts.join(" | ");
 }
 
 function toInternetMessageAttachment(htmlContent, reportFilePath) {
@@ -113,7 +140,8 @@ async function sendMail() {
 
   if (!response.ok) {
     const responseBody = await response.text();
-    throw new Error(`Graph sendMail failed (${response.status}): ${responseBody}`);
+    const detail = summarizeGraphFailure(response, responseBody);
+    throw new Error(`Graph sendMail failed (${response.status}): ${detail}`);
   }
 
   console.log(`Mail accepted by Graph. subject="${subject}" to=${recipients.join(", ")}`);
