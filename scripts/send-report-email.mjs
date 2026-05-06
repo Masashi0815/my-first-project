@@ -3,6 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ClientSecretCredential } from "@azure/identity";
 
+/** Bump when changing diagnostics so Actions logs prove which script ran. */
+const SCRIPT_DIAG_VERSION = "2026-02-08";
+
 const REQUIRED_ENV_KEYS = [
   "AZURE_TENANT_ID",
   "AZURE_CLIENT_ID",
@@ -83,6 +86,58 @@ function summarizeGraphFailure(response, responseBody) {
   return parts.join(" | ");
 }
 
+/** Decode JWT payload only (no verification) — for debugging tenant / roles. Never log the raw token. */
+function decodeJwtPayload(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      return null;
+    }
+    const json = Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function logTokenDiagnostics(token) {
+  const p = decodeJwtPayload(token);
+  if (!p) {
+    console.error("Token diagnostics: could not decode JWT (unexpected token shape).");
+    return;
+  }
+  const roles = Array.isArray(p.roles) ? p.roles : [];
+  console.error(
+    `Token diagnostics: tid=${p.tid ?? "?"} aud=${p.aud ?? "?"} appid=${p.appid ?? "?"} roles=${JSON.stringify(roles)}`,
+  );
+}
+
+function logGraphFailureLines(status, responseBody, response) {
+  console.error(`GRAPH_FAIL status=${status}`);
+  console.error(`GRAPH_FAIL body=${responseBody?.trim() ? responseBody.trim() : "(empty)"}`);
+  const wwwAuth = response.headers.get("www-authenticate");
+  if (wwwAuth) {
+    console.error(`GRAPH_FAIL WWW-Authenticate=${wwwAuth}`);
+  }
+  const reqId =
+    response.headers.get("request-id") ??
+    response.headers.get("x-ms-request-id") ??
+    response.headers.get("client-request-id");
+  if (reqId) {
+    console.error(`GRAPH_FAIL request-id=${reqId}`);
+  }
+  try {
+    for (const [key, value] of response.headers.entries()) {
+      if (/^(authorization|set-cookie)$/i.test(key)) {
+        continue;
+      }
+      console.error(`GRAPH_FAIL header ${key}: ${value}`);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 function toInternetMessageAttachment(htmlContent, reportFilePath) {
   const reportFileName = path.basename(reportFilePath);
   return {
@@ -109,7 +164,11 @@ async function sendMail() {
 
   const subject = process.env.REPORT_SUBJECT?.trim() || buildDefaultSubject();
   const shouldAttachReport = process.env.ATTACH_REPORT !== "false";
+
+  console.error(`send-report-email.mjs diagnostics=${SCRIPT_DIAG_VERSION}`);
+
   const token = await fetchGraphAccessToken();
+  logTokenDiagnostics(token);
 
   const mailPayload = {
     message: {
@@ -140,6 +199,7 @@ async function sendMail() {
 
   if (!response.ok) {
     const responseBody = await response.text();
+    logGraphFailureLines(response.status, responseBody, response);
     const detail = summarizeGraphFailure(response, responseBody);
     throw new Error(`Graph sendMail failed (${response.status}): ${detail}`);
   }
@@ -149,5 +209,8 @@ async function sendMail() {
 
 sendMail().catch((error) => {
   console.error(error.message);
+  if (error.stack) {
+    console.error(error.stack);
+  }
   process.exitCode = 1;
 });
