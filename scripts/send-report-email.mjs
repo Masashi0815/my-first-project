@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { ClientSecretCredential } from "@azure/identity";
 
 /** Bump when changing diagnostics so Actions logs prove which script ran. */
-const SCRIPT_DIAG_VERSION = "2026-02-08b";
+const SCRIPT_DIAG_VERSION = "2026-02-08c";
 
 const REQUIRED_ENV_KEYS = [
   "AZURE_TENANT_ID",
@@ -147,10 +147,16 @@ async function verifySenderExistsInTenant(token, senderUpn) {
   const snippet = body.length > 800 ? `${body.slice(0, 800)}…` : body;
   console.error(`USER_LOOKUP status=${r.status} sender=${senderUpn}`);
   console.error(`USER_LOOKUP body=${snippet || "(empty)"}`);
-  if (!r.ok) {
+  if (r.status === 403) {
     console.error(
-      "If status is 404: this sender is not a user in the SAME Entra tenant as AZURE_TENANT_ID. Use a mailbox user from Microsoft Entra ID → Users in that tenant (e.g. developer tenant user@xxx.onmicrosoft.com).",
+      "USER_LOOKUP 403: Mail.Send alone cannot read user profiles. Add Microsoft Graph APPLICATION permission User.Read.All + Grant admin consent — OR ignore this check and verify sender manually in Entra ID → Users.",
     );
+  } else if (r.status === 404) {
+    console.error(
+      "USER_LOOKUP 404: sender UPN not found in this tenant. Use Entra ID → Users → copy User principal name for OUTLOOK_SENDER_UPN.",
+    );
+  } else if (!r.ok) {
+    console.error("USER_LOOKUP failed; sender may still be valid if Mail.Send is granted.");
   }
 }
 
