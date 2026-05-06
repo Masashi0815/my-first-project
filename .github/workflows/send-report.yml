@@ -1,0 +1,46 @@
+name: Send WMS Report Mail
+
+on:
+  workflow_dispatch:
+    inputs:
+      report_subject:
+        description: "Optional subject override"
+        required: false
+        type: string
+      attach_report:
+        description: "Attach report HTML file"
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    # Every Friday at 09:00 UTC (18:00 JST)
+    - cron: "0 9 * * 5"
+
+jobs:
+  send-mail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Send report mail with Microsoft Graph
+        run: npm run send:report
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          OUTLOOK_SENDER_UPN: ${{ secrets.OUTLOOK_SENDER_UPN }}
+          OUTLOOK_TO: ${{ secrets.OUTLOOK_TO }}
+          REPORT_HTML_PATH: report-preview.html
+          REPORT_SUBJECT: ${{ github.event.inputs.report_subject }}
+          ATTACH_REPORT: ${{ github.event.inputs.attach_report }}

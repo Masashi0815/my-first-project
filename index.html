@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursorセットアップ完了！</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow: hidden;
+    }
+
+    /* 背景の浮かぶ泡 */
+    .bubbles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bubble {
+      position: absolute;
+      bottom: -120px;
+      border-radius: 50%;
+      opacity: 0.15;
+      animation: rise linear infinite;
+    }
+
+    @keyframes rise {
+      0%   { transform: translateY(0) scale(1);   opacity: 0.15; }
+      80%  { opacity: 0.12; }
+      100% { transform: translateY(-110vh) scale(1.3); opacity: 0; }
+    }
+
+    /* カード */
+    .card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 60px 56px 56px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      max-width: 680px;
+      width: 90vw;
+      animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* アイコン */
+    .icon {
+      font-size: 72px;
+      line-height: 1;
+      margin-bottom: 24px;
+      display: block;
+      animation: pop 0.6s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0); }
+      to   { transform: scale(1); }
+    }
+
+    /* メインタイトル */
+    .title {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 900;
+      background: linear-gradient(90deg, #f9ca24, #f0932b, #eb4d4b, #6c5ce7, #00cec9);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s ease infinite;
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* サブメッセージ */
+    .subtitle {
+      font-size: clamp(14px, 2.5vw, 20px);
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.78);
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      animation: fadeUp 0.9s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* バッジ群 */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      animation: fadeUp 0.9s 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .badge {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #fff;
+    }
+
+    .badge-1 { background: linear-gradient(135deg, #f9ca24, #f0932b); }
+    .badge-2 { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+    .badge-3 { background: linear-gradient(135deg, #00cec9, #55efc4); color: #1a1a2e; }
+    .badge-4 { background: linear-gradient(135deg, #fd79a8, #e84393); }
+
+    /* 下部の輝き */
+    .glow {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      z-index: -1;
+      animation: glowPulse 6s ease-in-out infinite;
+    }
+
+    .glow-1 { background: #6c5ce7; top: -80px; left: -60px; }
+    .glow-2 { background: #f9ca24; bottom: -80px; right: -60px; animation-delay: -3s; }
+
+    @keyframes glowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.25; }
+      50%       { transform: scale(1.2); opacity: 0.35; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景の浮かぶ泡をJSで生成 -->
+  <div class="bubbles" id="bubbles"></div>
+
+  <div class="card">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <span class="icon">🚀</span>
+
+    <h1 class="title">Cursorセットアップ完了！</h1>
+
+    <p class="subtitle">
+      AIと一緒にものづくりを始める準備ができました
+    </p>
+
+    <div class="badges">
+      <span class="badge badge-1">✨ AI コーディング</span>
+      <span class="badge badge-2">⚡ 爆速開発</span>
+      <span class="badge badge-3">🎨 クリエイティブ</span>
+      <span class="badge badge-4">🤖 Cursor Ready</span>
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById('bubbles');
+    const colors = ['#f9ca24','#f0932b','#eb4d4b','#6c5ce7','#00cec9','#fd79a8','#55efc4','#a29bfe'];
+
+    for (let i = 0; i < 18; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const size = Math.random() * 60 + 20;
+      b.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${Math.random() * 100}%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        animation-duration: ${Math.random() * 10 + 8}s;
+        animation-delay: ${Math.random() * 8}s;
+      `;
+      container.appendChild(b);
+    }
+  </script>
+</body>
+</html>

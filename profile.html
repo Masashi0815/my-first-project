@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>まーしーの自己紹介</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:  #1a2744;
+      --blue:  #2563eb;
+      --light: #eff4ff;
+      --accent:#f59e0b;
+      --text:  #1e293b;
+      --muted: #64748b;
+      --white: #ffffff;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f8faff;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(180deg, var(--navy) 0%, #1e3a7a 70%, #e8f0ff 100%);
+      color: #fff;
+      padding: 60px 20px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 70% 30%, rgba(37,99,235,.35) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 4px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 52px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 span {
+      color: #93c5fd;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      opacity: .8;
+      max-width: 500px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-image-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: -4px;
+    }
+
+    .hero-image-wrap img {
+      height: 340px;
+      width: auto;
+      display: block;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 56px 20px;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .section-label::before, .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: currentColor;
+      opacity: .3;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 900;
+      margin-bottom: 36px;
+      color: var(--navy);
+    }
+
+    /* ===== MAP GRID ===== */
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 580px) {
+      .map-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .map-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      border-top: 3px solid var(--blue);
+      transition: transform .25s, box-shadow .25s;
+    }
+
+    .map-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(37,99,235,.15);
+    }
+
+    .map-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: .1em;
+      margin-bottom: 8px;
+    }
+
+    .map-card-content {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.6;
+    }
+
+    .map-card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* ===== DETAIL SECTION ===== */
+    .detail-block {
+      margin-bottom: 40px;
+    }
+
+    .detail-block h3 {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--navy);
+      border-left: 4px solid var(--blue);
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+
+    .detail-block p {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.85;
+    }
+
+    /* ===== TIMELINE ===== */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--blue), #93c5fd);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 36px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--blue);
+    }
+
+    .timeline-period {
+      display: inline-block;
+      background: var(--light);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      letter-spacing: .06em;
+    }
+
+    .timeline-item h3 {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .timeline-item p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ===== GOALS ===== */
+    .goals {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 500px) {
+      .goals { grid-template-columns: 1fr; }
+    }
+
+    .goal-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .goal-card::before {
+      content: attr(data-num);
+      position: absolute;
+      right: 16px;
+      top: 10px;
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--light);
+      line-height: 1;
+    }
+
+    .goal-card h3 {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .goal-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.75;
+      position: relative;
+    }
+
+    /* ===== MESSAGE ===== */
+    .message-box {
+      background: linear-gradient(135deg, var(--navy), #243560);
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message-box::before {
+      content: '✦ ✦ ✧ ✧ ✦';
+      display: block;
+      font-size: 18px;
+      letter-spacing: .3em;
+      opacity: .4;
+      margin-bottom: 20px;
+    }
+
+    .message-box p {
+      font-size: 15px;
+      line-height: 1.9;
+      opacity: .9;
+      max-width: 520px;
+      margin: 0 auto 24px;
+    }
+
+    .message-box .closing {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ===== FADE IN ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">👋 はじめまして</div>
+    <h1>まーしー<span>こと</span><br>山本 雅 です</h1>
+    <p class="hero-sub">製薬会社MR・埼玉県北リーダー・短距離スプリンター</p>
+    <div class="hero-image-wrap">
+      <img src="masashi.png" alt="まーしー" />
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="section fade-in">
+    <div class="section-label">── 全体マップ ──</div>
+    <h2 class="section-title">まーしーってどんな人？</h2>
+    <div class="map-grid">
+      <div class="map-card">
+        <div class="map-card-label">名前</div>
+        <div class="map-card-content">山本 雅</div>
+        <div class="map-card-sub">やまもと まさし<br>ニックネーム：まーしー</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">出身</div>
+        <div class="map-card-content">滋賀県草津市</div>
+        <div class="map-card-sub">現在は埼玉在住</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">仕事</div>
+        <div class="map-card-content">製薬会社MR</div>
+        <div class="map-card-sub">埼玉県北エリア<br>リーダー</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">趣味①</div>
+        <div class="map-card-content">🏃 陸上競技</div>
+        <div class="map-card-sub">短距離専門<br>33歳で現役復帰</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">趣味②</div>
+        <div class="map-card-content">🎸 音楽鑑賞</div>
+        <div class="map-card-sub">King Gnu が大好き</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">ADS参加中</div>
+        <div class="map-card-content">💬 コミュニケーション大切</div>
+        <div class="map-card-sub">AIで業務改善に挑戦中</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- DETAIL -->
+  <div class="section fade-in">
+    <div class="section-label">── くわしく紹介します ──</div>
+    <h2 class="section-title">好きなこと・大切にしていること</h2>
+
+    <div class="detail-block">
+      <h3>🏃 陸上競技（短距離）</h3>
+      <p>学生時代から短距離走に取り組んでいました。社会人になってからは一度離れていましたが、33歳のときに「もう一度走りたい」という気持ちが抑えられなくなり現役復帰。一度離れても戻ってくるほど、走ることが好きなんだと実感しています。全力で駆け抜ける瞬間が、何より気持ちいいです。</p>
+    </div>
+
+    <div class="detail-block">
+      <h3>🎸 音楽 — King Gnu</h3>
+      <p>King Gnuが大好きです。独特の世界観と、ジャンルを超えたサウンドに初めて聴いたときから引き込まれました。移動中や仕事の合間によく聴いています。</p>
+    </div>
+
+    <div class="detail-block">
+      <h3>💬 コミュニケーションを大切に</h3>
+      <p>MRという仕事柄、医師や薬剤師の方々と信頼関係を築くことが一番大切だと感じています。相手の立場に立って話を聞き、患者さん目線で情報を届けることを常に意識しています。チームリーダーとしても、メンバーとの対話を大切にしています。</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TIMELINE -->
+  <div class="section fade-in">
+    <div class="section-label">── これまでの道のり ──</div>
+    <h2 class="section-title">まーしーのあゆみ</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="timeline-period">学生時代</span>
+        <h3>陸上競技に打ち込む</h3>
+        <p>短距離専門として陸上競技に熱中。チームで切磋琢磨しながら、走ることの楽しさと悔しさを学んだ時期。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-period">社会人〜</span>
+        <h3>製薬会社でMRとしてスタート</h3>
+        <p>医師や薬剤師の方々に医薬品情報を届けるMRとして入社。患者さんのためになる情報提供を目指して日々奮闘。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-period">33歳〜</span>
+        <h3>陸上競技に現役復帰</h3>
+        <p>仕事が忙しくなり一度は離れた陸上競技に再挑戦。「まだ走れる」という実感が自信につながった。</p>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-period">現在</span>
+        <h3>埼玉県北エリアのリーダーへ</h3>
+        <p>チームをまとめるリーダーとしての役割を担う。人員削減が続く中で、AIを活用した業務効率化に取り組もうとADSへ参加。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GOALS -->
+  <div class="section fade-in">
+    <div class="section-label">── これからの私 ──</div>
+    <h2 class="section-title">目指していること</h2>
+
+    <div class="goals">
+      <div class="goal-card" data-num="01">
+        <h3>AIで業務の質と効率を両立する</h3>
+        <p>人員が減っても仕事の質を落とさない。AIを使いこなして、チーム全体の生産性を高めていきたい。</p>
+      </div>
+      <div class="goal-card" data-num="02">
+        <h3>現場で本当に使えるスキルを身につける</h3>
+        <p>理論だけでなく、MRの現場で実際に役立つAI活用法を学び、すぐに実践に移したい。</p>
+      </div>
+      <div class="goal-card" data-num="03">
+        <h3>チームメンバーにも広める</h3>
+        <p>自分が学んだことをチームに共有し、メンバー全員がスマートに働ける環境を作っていきたい。</p>
+      </div>
+      <div class="goal-card" data-num="04">
+        <h3>走り続ける</h3>
+        <p>陸上も仕事も、止まらずに続けること。年齢に関係なく「まだやれる」を証明し続けたい。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MESSAGE -->
+  <div class="section fade-in">
+    <div class="message-box">
+      <p>
+        仕事でも陸上でも、「続けること」と「諦めないこと」を大切にしてきました。<br>
+        AIという新しい分野に飛び込むのは少し緊張しますが、<br>
+        一緒に学べる仲間がいることがとても心強いです。
+      </p>
+      <p class="closing">半年間、よろしくお願いします！🙌</p>
+    </div>
+  </div>
+
+
+  <script>
+    // フェードイン
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
