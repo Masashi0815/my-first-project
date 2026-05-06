@@ -4,18 +4,23 @@ import { fileURLToPath } from "node:url";
 import { ClientSecretCredential } from "@azure/identity";
 
 /** Bump when changing diagnostics so Actions logs prove which script ran. */
-const SCRIPT_DIAG_VERSION = "2026-02-08c";
+const SCRIPT_DIAG_VERSION = "2026-02-08d";
 
 const REQUIRED_ENV_KEYS = [
   "AZURE_TENANT_ID",
   "AZURE_CLIENT_ID",
   "AZURE_CLIENT_SECRET",
-  "OUTLOOK_SENDER_UPN",
   "OUTLOOK_TO",
 ];
 
 function getMissingEnv() {
-  return REQUIRED_ENV_KEYS.filter((key) => !process.env[key]?.trim());
+  const missing = REQUIRED_ENV_KEYS.filter((key) => !process.env[key]?.trim());
+  const hasSender =
+    process.env.OUTLOOK_SENDER_OBJECT_ID?.trim() || process.env.OUTLOOK_SENDER_UPN?.trim();
+  if (!hasSender) {
+    missing.push("OUTLOOK_SENDER_UPN or OUTLOOK_SENDER_OBJECT_ID");
+  }
+  return missing;
 }
 
 function parseRecipients(raw) {
@@ -138,14 +143,29 @@ function logGraphFailureLines(status, responseBody, response) {
   }
 }
 
-async function verifySenderExistsInTenant(token, senderUpn) {
-  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(senderUpn)}?$select=id,userPrincipalName,mail`;
+function senderPathForGraphApi() {
+  const objectId = process.env.OUTLOOK_SENDER_OBJECT_ID?.trim();
+  if (objectId) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(objectId)) {
+      throw new Error("OUTLOOK_SENDER_OBJECT_ID must be a UUID (from Entra user Overview).");
+    }
+    return { segment: objectId, label: `objectId=${objectId}` };
+  }
+  const upn = process.env.OUTLOOK_SENDER_UPN?.trim();
+  if (!upn) {
+    throw new Error("Set OUTLOOK_SENDER_UPN or OUTLOOK_SENDER_OBJECT_ID.");
+  }
+  return { segment: encodeURIComponent(upn), label: `upn=${upn}` };
+}
+
+async function verifySenderExistsInTenant(token, pathSegment) {
+  const url = `https://graph.microsoft.com/v1.0/users/${pathSegment}?$select=id,userPrincipalName,mail`;
   const r = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const body = await r.text();
   const snippet = body.length > 800 ? `${body.slice(0, 800)}…` : body;
-  console.error(`USER_LOOKUP status=${r.status} sender=${senderUpn}`);
+  console.error(`USER_LOOKUP status=${r.status} path=${pathSegment}`);
   console.error(`USER_LOOKUP body=${snippet || "(empty)"}`);
   if (r.status === 403) {
     console.error(
@@ -192,7 +212,13 @@ async function sendMail() {
   const token = await fetchGraphAccessToken();
   logTokenDiagnostics(token);
 
-  await verifySenderExistsInTenant(token, process.env.OUTLOOK_SENDER_UPN.trim());
+  const senderPath = senderPathForGraphApi();
+  console.error(`sendMail path: ${senderPath.label}`);
+  if (process.env.SKIP_USER_LOOKUP === "true") {
+    console.error("SKIP_USER_LOOKUP=true: skipping GET /users lookup.");
+  } else {
+    await verifySenderExistsInTenant(token, senderPath.segment);
+  }
 
   const mailPayload = {
     message: {
@@ -209,8 +235,7 @@ async function sendMail() {
     saveToSentItems: true,
   };
 
-  const sender = encodeURIComponent(process.env.OUTLOOK_SENDER_UPN);
-  const endpoint = `https://graph.microsoft.com/v1.0/users/${sender}/sendMail`;
+  const endpoint = `https://graph.microsoft.com/v1.0/users/${senderPath.segment}/sendMail`;
 
   const response = await fetch(endpoint, {
     method: "POST",

@@ -25,6 +25,10 @@ Decide sender and recipients:
 
 `OUTLOOK_SENDER_UPN` should be a mailbox the app is allowed to send from.
 
+Optional (recommended for guest UPNs with `#` in the name): set **`OUTLOOK_SENDER_OBJECT_ID`** to the user’s **Object ID** (from Entra ID → user → Overview). The script then calls `.../users/{object-id}/sendMail` and avoids URL issues with special characters.
+
+Optional: set **`SKIP_USER_LOOKUP`** to `true` to skip the diagnostic `GET /users` call (or add **User.Read.All** app permission if you want the lookup to succeed).
+
 ## 3) GitHub repository secrets
 
 Set these repository secrets in GitHub:
@@ -32,8 +36,9 @@ Set these repository secrets in GitHub:
 - `AZURE_TENANT_ID`
 - `AZURE_CLIENT_ID`
 - `AZURE_CLIENT_SECRET`
-- `OUTLOOK_SENDER_UPN`
+- `OUTLOOK_SENDER_UPN` (unless you use `OUTLOOK_SENDER_OBJECT_ID` only)
 - `OUTLOOK_TO`
+- (Optional) `OUTLOOK_SENDER_OBJECT_ID`, `SKIP_USER_LOOKUP`
 
 ## 4) Local test
 
