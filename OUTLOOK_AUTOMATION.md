@@ -11,7 +11,10 @@ This project sends `report-preview.html` as an Outlook email using Microsoft Gra
 3. Create a client secret under Certificates & secrets.
 4. API permissions:
    - Microsoft Graph -> Application permissions -> `Mail.Send`
-5. Click **Grant admin consent**.
+   - (Optional, for script user lookup only) also add `User.Read.All`
+5. Click **Grant admin consent** for the tenant.
+
+`Mail.Send` sends mail; it does **not** allow reading user directory (`GET /users`). Optional `User.Read.All` lets the diagnostic `USER_LOOKUP` step succeed instead of HTTP 403.
 
 ## 2) Mailbox settings
 
