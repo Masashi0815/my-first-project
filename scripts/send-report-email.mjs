@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { ClientSecretCredential } from "@azure/identity";
 
 /** Bump when changing diagnostics so Actions logs prove which script ran. */
-const SCRIPT_DIAG_VERSION = "2026-02-08";
+const SCRIPT_DIAG_VERSION = "2026-02-08b";
 
 const REQUIRED_ENV_KEYS = [
   "AZURE_TENANT_ID",
@@ -138,6 +138,22 @@ function logGraphFailureLines(status, responseBody, response) {
   }
 }
 
+async function verifySenderExistsInTenant(token, senderUpn) {
+  const url = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(senderUpn)}?$select=id,userPrincipalName,mail`;
+  const r = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await r.text();
+  const snippet = body.length > 800 ? `${body.slice(0, 800)}…` : body;
+  console.error(`USER_LOOKUP status=${r.status} sender=${senderUpn}`);
+  console.error(`USER_LOOKUP body=${snippet || "(empty)"}`);
+  if (!r.ok) {
+    console.error(
+      "If status is 404: this sender is not a user in the SAME Entra tenant as AZURE_TENANT_ID. Use a mailbox user from Microsoft Entra ID → Users in that tenant (e.g. developer tenant user@xxx.onmicrosoft.com).",
+    );
+  }
+}
+
 function toInternetMessageAttachment(htmlContent, reportFilePath) {
   const reportFileName = path.basename(reportFilePath);
   return {
@@ -169,6 +185,8 @@ async function sendMail() {
 
   const token = await fetchGraphAccessToken();
   logTokenDiagnostics(token);
+
+  await verifySenderExistsInTenant(token, process.env.OUTLOOK_SENDER_UPN.trim());
 
   const mailPayload = {
     message: {
